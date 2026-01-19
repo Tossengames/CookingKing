@@ -1,42 +1,88 @@
 const quizEngine = {
+    currentQuestion: null,
+
     start() {
-        manager.showScreen('quiz-screen');
+        manager.showScreen('cooking-screen', false);
+        manager.showScreen('quiz-screen', true);
+        
+        // Randomly decide which type of quiz to show
         const rand = Math.random();
-        if (rand > 0.6) this.originQuiz();
-        else if (rand > 0.3) this.healthQuiz();
-        else this.oddOneOut();
+        
+        if (rand > 0.75) {
+            this.setupOriginQuiz();
+        } else if (rand > 0.50) {
+            this.setupOddOneOut();
+        } else if (rand > 0.25) {
+            this.setupMarketQuiz();
+        } else {
+            this.setupHealthQuiz();
+        }
     },
 
-    render(q, opts, correct) {
-        document.getElementById('q-text').innerText = q;
+    // 1. ORIGIN QUIZ: "Which country is famous for...?"
+    setupOriginQuiz() {
+        const dish = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
+        const question = `Chef Gusto asks: Which country is famous for ${dish.name}?`;
+        
+        // Generate options including the correct one
+        const correct = `${dish.origin} ${dish.flag}`;
+        const options = [correct, "USA 🇺🇸", "Brazil 🇧🇷", "India 🇮🇳", "Germany 🇩🇪"];
+        
+        this.render(question, options, correct, `Correct! ${dish.name} is a masterpiece of ${dish.origin}.`);
+    },
+
+    // 2. ODD ONE OUT: "Which ingredient DOES NOT belong?"
+    setupOddOneOut() {
+        const dish = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
+        const question = `Quick! Which of these is NOT used in a traditional ${dish.name}?`;
+        
+        const correct = dish.junk[Math.floor(Math.random() * dish.junk.length)];
+        // Pick two real ingredients
+        const real1 = dish.ingredients[0];
+        const real2 = dish.ingredients[1];
+        
+        const options = [correct, real1, real2];
+        this.render(question, options, correct, `Exactly! ${correct} would ruin the flavor of ${dish.name}!`);
+    },
+
+    // 3. HEALTH & REMEDIES
+    setupHealthQuiz() {
+        const h = foodData.health[Math.floor(Math.random() * foodData.health.length)];
+        this.render(`Health Tip: ${h.q}`, h.opts, h.a, h.info);
+    },
+
+    // 4. MARKET PRACTICES & ORGANIC
+    setupMarketQuiz() {
+        const m = foodData.market[Math.floor(Math.random() * foodData.market.length)];
+        this.render(`Market Skill: ${m.q}`, m.opts, m.a, m.info);
+    },
+
+    // RENDER LOGIC
+    render(question, options, correct, feedbackMsg) {
+        manager.updateChef(question);
+        
         const box = document.getElementById('options-box');
         box.innerHTML = '';
-        opts.sort(() => Math.random() - 0.5).forEach(o => {
-            const b = document.createElement('button');
-            b.className = 'opt-btn';
-            b.innerText = o;
-            b.onclick = () => {
-                if (o === correct) { alert("Correct!"); manager.addScore(10); manager.nextTask(); }
-                else { alert("Wrong! Try the next one."); manager.nextTask(); }
+
+        // Shuffle options
+        options.sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn'; // Uses the style from our CSS
+            btn.innerText = opt;
+            
+            btn.onclick = () => {
+                if (opt === correct) {
+                    manager.addScore(15);
+                    manager.showFeedback("Magnificent!", feedbackMsg, true);
+                } else {
+                    manager.showFeedback("Oh No!", "That's not what the recipe calls for. Keep studying!", false);
+                }
             };
-            box.appendChild(b);
+            box.appendChild(btn);
         });
-    },
-
-    originQuiz() {
-        const d = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
-        this.render(`Which country is famous for ${d.name}?`, [d.origin + " " + d.flag, "Germany 🇩🇪", "Canada 🇨🇦", "India 🇮🇳"], d.origin + " " + d.flag);
-    },
-
-    healthQuiz() {
-        const h = foodData.health[Math.floor(Math.random() * foodData.health.length)];
-        this.render(h.q, h.options, h.a);
-    },
-
-    oddOneOut() {
-        const d = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
-        const wrong = d.wrong[Math.floor(Math.random() * d.wrong.length)];
-        const opts = [d.ingredients[0], d.ingredients[1], wrong];
-        this.render(`Which ingredient is NOT used in a traditional ${d.name}?`, opts, wrong);
     }
 };
+
+
