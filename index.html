@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gourmet Master: Ultimate Chef</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gourmet Master: Chef Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,36 +16,115 @@
 
         <div id="timer-bar"><div id="timer-progress"></div></div>
 
+        <div id="chef-talk-area">
+            <div id="chef-avatar">👨‍🍳</div>
+            <div id="chef-bubble">Welcome to my kitchen! Build something delicious.</div>
+        </div>
+
         <div id="menu-screen" class="screen active">
             <h1>🍳 Gourmet Master</h1>
             <div class="menu-box">
-                <p>Region Selection:</p>
+                <p>Select Region:</p>
                 <select id="region-select">
                     <option value="World">Worldwide</option>
-                    <option value="French">French Cuisine</option>
-                    <option value="Italian">Italian Cuisine</option>
+                    <option value="French">French</option>
+                    <option value="Italian">Italian</option>
                 </select>
                 <p>Game Type:</p>
                 <select id="mode-select">
-                    <option value="all">Mix Everything</option>
-                    <option value="quiz">Knowledge & Health</option>
-                    <option value="cooking">Cooking Challenges</option>
+                    <option value="all">Mixed Adventure</option>
+                    <option value="quiz">Knowledge Only</option>
+                    <option value="cooking">Cooking Only</option>
                 </select>
             </div>
-            <button class="main-btn" onclick="manager.startGame()">START ADVENTURE</button>
+            <button class="main-btn" onclick="manager.startGame()">START GAME</button>
         </div>
 
         <div id="quiz-screen" class="screen">
-            <h3 id="q-text"></h3>
-            <div id="q-img" class="placeholder-img">🍲</div>
             <div id="options-box"></div>
         </div>
 
         <div id="cooking-screen" class="screen">
-            <h3 id="cook-goal"></h3>
             <div id="plates-container"></div>
             <div id="ingredient-bank"></div>
-            <button class="main-btn" onclick="cookingEngine.checkResult()">FINISH DISH</button>
+            <button class="main-btn" onclick="cookingEngine.checkResult()">FINISH MEAL</button>
+        </div>
+
+        <div id="feedback-panel" class="hidden">
+            <div class="panel-content">
+                <div id="panel-avatar">👨‍🍳</div>
+                <h2 id="panel-title">Result</h2>
+                <p id="panel-msg"></p>
+                <button class="main-btn" onclick="manager.closeFeedback()">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="game-manager.js"></script>
+    <script src="quiz-engine.js"></script>
+    <script src="cooking-engine.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gourmet Master: Chef Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div class="header">
+            <h2 id="lvl">Level 1</h2>
+            <div id="score-val">Score: 0</div>
+            <button onclick="manager.resetGame()" class="reset-btn">Reset</button>
+        </div>
+
+        <div id="timer-bar"><div id="timer-progress"></div></div>
+
+        <div id="chef-talk-area">
+            <div id="chef-avatar">👨‍🍳</div>
+            <div id="chef-bubble">Welcome to my kitchen! Build something delicious.</div>
+        </div>
+
+        <div id="menu-screen" class="screen active">
+            <h1>🍳 Gourmet Master</h1>
+            <div class="menu-box">
+                <p>Select Region:</p>
+                <select id="region-select">
+                    <option value="World">Worldwide</option>
+                    <option value="French">French</option>
+                    <option value="Italian">Italian</option>
+                </select>
+                <p>Game Type:</p>
+                <select id="mode-select">
+                    <option value="all">Mixed Adventure</option>
+                    <option value="quiz">Knowledge Only</option>
+                    <option value="cooking">Cooking Only</option>
+                </select>
+            </div>
+            <button class="main-btn" onclick="manager.startGame()">START GAME</button>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <div id="options-box"></div>
+        </div>
+
+        <div id="cooking-screen" class="screen">
+            <div id="plates-container"></div>
+            <div id="ingredient-bank"></div>
+            <button class="main-btn" onclick="cookingEngine.checkResult()">FINISH MEAL</button>
+        </div>
+
+        <div id="feedback-panel" class="hidden">
+            <div class="panel-content">
+                <div id="panel-avatar">👨‍🍳</div>
+                <h2 id="panel-title">Result</h2>
+                <p id="panel-msg"></p>
+                <button class="main-btn" onclick="manager.closeFeedback()">CONTINUE</button>
+            </div>
         </div>
     </div>
 
