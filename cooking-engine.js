@@ -1,99 +1,100 @@
 const cookingEngine = {
-    subMode: 'single',
-    targets: [],
-    contents: { p0: [], p1: [], p2: [] },
+    activePlate: [],
     timer: null,
+    targetDish: null,
 
     start() {
-        manager.showScreen('cooking-screen');
-        clearInterval(this.timer);
-        this.contents = { p0: [], p1: [], p2: [] };
+        manager.showScreen('quiz-screen', false);
+        manager.showScreen('cooking-screen', true);
+        this.activePlate = [];
         
-        const rand = Math.random();
-        if (rand > 0.7) this.setupTriple();
-        else if (rand > 0.4) this.setupPantry();
-        else this.setupSingle();
-
-        this.startTimer(this.subMode === 'triple' ? 45 : 25);
+        // Pick a random dish as a goal
+        this.targetDish = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
+        manager.updateChef(`I need you to cook: ${this.targetDish.name}`);
+        
+        this.renderPlates();
+        this.renderBank();
+        this.startTimer(30);
     },
 
-    setupSingle() {
-        this.subMode = 'single';
-        const d = foodData.dishes[Math.floor(Math.random() * foodData.dishes.length)];
-        this.targets = [d];
-        document.getElementById('cook-goal').innerText = `Chef's Order: ${d.name}`;
-        this.buildPlates(1);
-        this.buildBank(d.ingredients, d.wrong);
-    },
-
-    setupTriple() {
-        this.subMode = 'triple';
-        this.targets = [...foodData.dishes].sort(() => 0.5 - Math.random()).slice(0, 3);
-        document.getElementById('cook-goal').innerText = `3-Course Challenge! (Check Plate Labels)`;
-        this.buildPlates(3);
-        this.buildBank(this.targets.flatMap(t => t.ingredients), ["Soap", "Plastic"]);
-    },
-
-    setupPantry() {
-        this.subMode = 'pantry';
-        document.getElementById('cook-goal').innerText = "Pantry Mode: Make any dish you know!";
-        this.buildPlates(1);
-        this.buildBank(foodData.dishes.flatMap(d => d.ingredients), ["Old Boot"]);
-    },
-
-    buildPlates(n) {
+    renderPlates() {
         const con = document.getElementById('plates-container');
-        con.innerHTML = '';
-        for(let i=0; i<n; i++) {
-            const p = document.createElement('div');
-            p.className = 'plate-zone';
-            p.innerHTML = `<span class="plate-label">${this.subMode === 'triple' ? this.targets[i].name : 'Plate'}</span><div id="p-items${i}"></div>`;
-            p.ondragover = (e) => e.preventDefault();
-            p.ondrop = (e) => {
-                const ing = e.dataTransfer.getData('text');
-                if(!this.contents[`p${i}`].includes(ing)) {
-                    this.contents[`p${i}`].push(ing);
-                    const s = document.createElement('span'); s.innerText = ing;
-                    document.getElementById(`p-items${i}`).appendChild(s);
-                }
-            };
-            con.appendChild(p);
-        }
+        con.innerHTML = `<div class="plate-zone" id="main-plate" ondragover="event.preventDefault()" ondrop="cookingEngine.handleDrop(event)">
+            <span class="plate-label">MAIN PLATE</span>
+        </div>`;
     },
 
-    buildBank(req, junk) {
-        const b = document.getElementById('ingredient-bank');
-        b.innerHTML = '';
-        [...new Set([...req, ...junk])].sort(() => Math.random() - 0.5).forEach(ing => {
-            const d = document.createElement('div');
-            d.className = 'ing'; d.draggable = true; d.innerText = ing;
-            d.ondragstart = (e) => e.dataTransfer.setData('text', ing);
-            b.appendChild(d);
+    renderBank() {
+        const bank = document.getElementById('ingredient-bank');
+        bank.innerHTML = '';
+        const ings = [...this.targetDish.ingredients, ...this.targetDish.junk].sort(() => 0.5 - Math.random());
+        
+        ings.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'ing-item';
+            div.draggable = true;
+            div.innerHTML = `<div class="ing-circle">🍎</div><div class="ing-name">${name}</div>`;
+            div.ondragstart = (e) => e.dataTransfer.setData('text', name);
+            bank.appendChild(div);
         });
     },
 
-    startTimer(sec) {
-        let left = sec;
-        this.timer = setInterval(() => {
-            left--;
-            document.getElementById('timer-progress').style.width = (left/sec*100) + "%";
-            if(left <= 0) { clearInterval(this.timer); alert("Time Out!"); manager.nextTask(); }
-        }, 1000);
+    handleDrop(e) {
+        e.preventDefault();
+        const name = e.dataTransfer.getData('text');
+        if(!this.activePlate.includes(name)) {
+            this.activePlate.push(name);
+            this.visualAdd(name);
+        }
+    },
+
+    visualAdd(name) {
+        const plate = document.getElementById('main-plate');
+        const item = document.createElement('div');
+        item.className = 'dropped-ing';
+        item.innerText = "🔸"; // Placeholder for ingredient visual
+        
+        // Random spread inside circle
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 40 + 10;
+        item.style.left = `calc(50% + ${Math.cos(angle) * dist}px)`;
+        item.style.top = `calc(50% + ${Math.sin(angle) * dist}px)`;
+        
+        plate.appendChild(item);
     },
 
     checkResult() {
         clearInterval(this.timer);
-        let win = false;
-        if (this.subMode === 'single') win = this.isMatch(this.contents.p0, this.targets[0]);
-        else if (this.subMode === 'triple') win = this.targets.every((t, i) => this.isMatch(this.contents[`p${i}`], t));
-        else if (this.subMode === 'pantry') win = foodData.dishes.some(d => this.isMatch(this.contents.p0, d));
+        
+        // DEBUG LOG
+        console.log("--- CHEF DEBUG ---");
+        console.log("Your Plate:", this.activePlate);
+        console.log("Goal:", this.targetDish.name, this.targetDish.ingredients);
 
-        if(win) { alert("Perfect Dish!"); manager.addScore(30); }
-        else alert("Chef says: This is terrible!");
-        manager.nextTask();
+        // Flexible Match: Check if plate matches ANY dish in data
+        const matchedDish = foodData.dishes.find(d => 
+            d.ingredients.length === this.activePlate.length && 
+            d.ingredients.every(i => this.activePlate.includes(i))
+        );
+
+        if (matchedDish) {
+            manager.addScore(25);
+            manager.showFeedback("Delicious!", `You successfully made ${matchedDish.name}!`, true);
+        } else {
+            manager.showFeedback("Kitchen Disaster!", "Chef Gusto cannot serve this mess!", false);
+        }
     },
 
-    isMatch(p, d) {
-        return d.ingredients.every(i => p.includes(i)) && p.length === d.ingredients.length;
+    startTimer(sec) {
+        let time = sec;
+        const bar = document.getElementById('timer-progress');
+        this.timer = setInterval(() => {
+            time -= 0.1;
+            bar.style.width = (time / sec * 100) + "%";
+            if(time <= 0) {
+                clearInterval(this.timer);
+                manager.showFeedback("Time's Up!", "The kitchen is closed!", false);
+            }
+        }, 100);
     }
 };
