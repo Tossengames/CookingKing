@@ -1,0 +1,27 @@
+:root { --primary: #e67e22; --secondary: #2ecc71; --danger: #e74c3c; }
+body { background: #fdf2e9; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 20px; }
+#game-container { width: 450px; background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); overflow: hidden; position: relative; }
+
+.header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.reset-btn { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 5px; cursor: pointer; }
+
+#timer-bar { width: 100%; height: 8px; background: #eee; }
+#timer-progress { width: 100%; height: 100%; background: var(--danger); transition: width 1s linear; }
+
+.screen { display: none; padding: 25px; animation: fadeIn 0.4s; }
+.active { display: block; }
+
+.main-btn { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; }
+.opt-btn { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 10px; cursor: pointer; background: white; transition: 0.2s; }
+.opt-btn:hover { border-color: var(--primary); background: #fffaf0; }
+
+/* Plate Layouts */
+#plates-container { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
+.plate-zone { width: 110px; height: 110px; border: 3px dashed #bdc3c7; border-radius: 50%; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; background: #fafafa; }
+.plate-label { position: absolute; top: -18px; font-weight: bold; color: #95a5a6; text-transform: uppercase; font-size: 9px; }
+
+#ingredient-bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 15px; background: #f9f9f9; border-radius: 10px; min-height: 100px; }
+.ing { padding: 6px 12px; background: #fff; border: 1px solid #ddd; border-radius: 20px; cursor: grab; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+.placeholder-img { font-size: 60px; text-align: center; margin: 20px 0; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
