@@ -2,11 +2,10 @@ const manager = {
     score: parseInt(localStorage.getItem('gm_score')) || 0,
     level: parseInt(localStorage.getItem('gm_level')) || 1,
     currentMode: 'all',
-    currentRegion: 'World',
 
     startGame() {
         this.currentMode = document.getElementById('mode-select').value;
-        this.currentRegion = document.getElementById('region-select').value;
+        this.showScreen('menu-screen', false);
         this.updateUI();
         this.nextTask();
     },
@@ -17,6 +16,22 @@ const manager = {
         
         if (task === 'quiz') quizEngine.start();
         else cookingEngine.start();
+    },
+
+    updateChef(msg) {
+        document.getElementById('chef-bubble').innerText = msg;
+    },
+
+    showFeedback(title, msg, isWin) {
+        document.getElementById('panel-title').innerText = title;
+        document.getElementById('panel-msg').innerText = msg;
+        document.getElementById('panel-avatar').innerText = isWin ? "👨‍🍳✨" : "👨‍🍳💢";
+        document.getElementById('feedback-panel').classList.remove('hidden');
+    },
+
+    closeFeedback() {
+        document.getElementById('feedback-panel').classList.add('hidden');
+        this.nextTask();
     },
 
     addScore(pts) {
@@ -30,12 +45,10 @@ const manager = {
     updateUI() {
         document.getElementById('score-val').innerText = `Score: ${this.score}`;
         document.getElementById('lvl').innerText = `Level ${this.level}`;
-        document.getElementById('timer-progress').style.width = "100%";
     },
 
-    showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    showScreen(id, active = true) {
+        document.getElementById(id).classList.toggle('active', active);
     },
 
     resetGame() {
